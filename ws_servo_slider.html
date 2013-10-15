@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>The HTML5 Slider Element / Range Input Element | Tutorialzine Demo</title>
+        
+        <!-- CSS stylesheets -->
+        <link rel="stylesheet" href="assets/css/styles.css" />
+        
+        <!--[if lt IE 9]>
+          <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+    </head>
+    
+    <body>
+
+		
+		<section id="main">
+			<p class="examples">Servo Slider Example</p>
+			
+			<!-- 2200 - 4600: THESE ARE FUNNY LIMITS -->
+			<input id="defaultSlider" type="range" min="2200" max="4600" step ="1" value="2200"/>
+			<p class="note">Current value: <span id="currentValue">0</span></p>
+			<p class="note">Current angle: <span id="currentAngle">0&deg;</span></p>
+			
+		</section>
+		
+		
+		<div id="output"></div>  
+		
+        
+        <!-- Including jQuery and jQuery UI from Google's CDN -->
+		<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+		
+		<script language="javascript" type="text/javascript">  
+		$(function(){
+
+			var currentValue = $('#currentValue');
+			var currentAngle = $('#currentAngle');
+
+			$('#defaultSlider').change(function(){
+			    currentValue.html(this.value);
+			
+			//EXPERIMENTAL  This is just an approximation of the angle.
+			var angle = (((this.value - 2200)/10)/1.19 );
+			    currentAngle.html(angle.toFixed(1) + '&deg;');
+			
+			    doSend(this.value)
+			});
+
+			// Trigger the event on load, so
+			// the value field is populated:
+
+			$('#defaultSlider').change();
+
+		});
+		
+		//CHANGE THIS TO YOUR URL FOR GREAT VICTORY!!!
+		var wsUri = "ws://192.168.7.2:8080"; 
+		var output;  
+		function init() { 
+			output = document.getElementById("output"); 
+			testWebSocket(); 
+		}  
+		function testWebSocket() { 
+			websocket = new WebSocket(wsUri); 
+			websocket.onopen = function(evt) { 
+				onOpen(evt) 
+			}; 
+			websocket.onclose = function(evt) { 
+				onClose(evt)
+			}; 
+			websocket.onmessage = function(evt) { 
+				onMessage(evt) 
+			}; 
+			websocket.onerror = function(evt) { 
+				onError(evt) 
+			}; 
+		}  
+        
+         
+		function onOpen(evt) { 
+			writeToScreen("CONNECTED"); 
+			doSend("servoOn");
+			doSend("2200");  //SET the servo to the lower limit at connection. 
+
+		}  
+		function onClose(evt) { 
+			writeToScreen("DISCONNECTED"); 
+		}  
+		function onMessage(evt) { 
+			writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>'); 
+			//websocket.close(); 
+		}  
+		function onError(evt) { 
+		    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data); 
+		}  
+		function doSend(message) { 
+			writeToScreen("SENT: " + message);  
+			websocket.send(message); 
+		}  
+		function writeToScreen(message) { 
+			var pre = document.createElement("p"); 
+			pre.style.wordWrap = "break-word"; 
+			pre.innerHTML = message; 
+			output.appendChild(pre); 
+			
+		}  
+		window.addEventListener("load", init, false);  
+		</script>
+
+		<!--script src="assets/js/slider-default.js"></script-->
+		
+		
+
+       
+    
+    </body>
+</html>
+
